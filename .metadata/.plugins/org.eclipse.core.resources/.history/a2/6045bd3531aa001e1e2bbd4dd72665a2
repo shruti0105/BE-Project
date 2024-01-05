@@ -1,0 +1,24 @@
+package com.project.app.controller;
+
+import java.security.*;
+import java.security.spec.*;
+
+public class Key_format {
+
+    public static void main(String[] args) {
+
+        String rsaPublicKeyString = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzZpZQgjuc3v9+tp1NG4Sg1aM7QowE5hh2bF4Y0o6vjBuPtT9bwcnDb1J+txlGKTrjhKxqrRUL1dGfxXo5gXZVLwRqtVXGvLC4+QfWukmToR9KihAnj83UfRg+Mmfb16B9ckIe49h4lzRbDzIlUARLrX23bPmqdFJdF44fDxVcO5drz7k7ICWh0FXdp4/n8/BMhNNEoj/Ko+7hDW1RB2cugZUdHzoBpvZdFz0zDrLXx3rBqP5hBTPRQvktHl+C4eRAT/zXO7MSKct5wTbjAr3iVpd1V6KrOS6whVozZZL4D9zS34d8f+U3/XM5XGvwJpwx2F9A3K4VmVE21bQIDAQAB";
+
+        try {
+            byte[] publicKeyBytes = java.util.Base64.getDecoder().decode(rsaPublicKeyString);
+
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PublicKey publicKey = keyFactory.generatePublic(keySpec);
+
+            System.out.println("Generated Public Key: " + publicKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}

@@ -1,0 +1,17 @@
+package com.project.npci.controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/npci")
+public class NpciController {
+
+    @PostMapping("/process-transaction")
+    public String processTransaction(@RequestBody Transaction data) {
+        // Process the received transaction data from UPI server
+        // Your logic here...
+        return "Transaction processed by NPCI successfully";
+    }
+}

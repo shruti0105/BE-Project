@@ -1,0 +1,60 @@
+package com.project.npci.controller;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
+
+import javax.crypto.Cipher;
+
+@RestController
+public class NpciController {
+
+    // Arbitrary private key (for demonstration purposes)
+    static final String RSA_PRIVATE_KEY =
+            "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDJfaQaT7JGxj8g" +
+            // ... (truncated for brevity)
+            "lOMXxg/bCjN9Rx+UQUuKf4znn0xzeXjI2FeODvhgAQ8zL7ztl2tdlcSNlbV1B2rA" +
+            "yHUsZoKf0P9Y3cJX+2m4lX8aFNz0xYAm3ZVjHURmXZyPYz3f1FM+Z0yjP7yydXf8" +
+            "UxFlMiLWVU6JcAgMBAAECggEAVf3Ew3jNjzBDwGqNTKt4RFiaXTMe3/ZgG/TPi9t" +
+            "cOt90AaW1wR68uG8FGqfLDv6u12HJYN4sd6vmPzBIQkJvj2amf5NsO1P54kviT7o" +
+            // ... (truncated for brevity)
+            "hBi8wguJ6FhTwFO/89gsbPqJ5HmHNnkc3zI9Y+EFt0cvDOJzCEiO8jtRk/MBMzsf" +
+            "X8kO7tQQW4JzrfNpEAJhZQIgK8hkslz03kH1Dx2xZGwgOux9M9hCMflS3g==";
+
+    @PostMapping("/process-transaction")
+    public ResponseEntity<String> processTransaction(@RequestBody String encryptedData) {
+        try {
+            // Decode the received encrypted data from Base64
+            byte[] encryptedBytes = Base64.getDecoder().decode(encryptedData);
+
+            // Perform decryption using the private key
+            PrivateKey privateKey = getPrivateKeyFromString(RSA_PRIVATE_KEY);
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+
+            // Convert the decrypted bytes to a string
+            String decryptedData = new String(decryptedBytes);
+
+            // Process the decrypted data as needed
+            System.out.println("Decrypted data: " + decryptedData);
+
+            return ResponseEntity.ok("Data decrypted and processed successfully");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to decrypt or process data");
+        }
+    }
+
+    // Helper method to get PrivateKey from a string representation
+    private PrivateKey getPrivateKeyFromString(String key) throws Exception {
+        byte[] privateKeyBytes = Base64.getDecoder().decode(key);
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(privateKeyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return keyFactory.generatePrivate(spec);
+    }
+}

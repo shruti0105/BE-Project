@@ -1,0 +1,60 @@
+package com.project.npci.controller;
+
+import javax.crypto.Cipher;
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+
+public class NpciController {
+
+    public static void main(String[] args) {
+        try {
+            // Replace this example private key with your own properly formatted private key
+            String examplePrivateKey = "-----BEGIN PRIVATE KEY-----\n"
+                    + "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCrHbf4ExlrXoqX\n"
+                    + "5GMkZLkOjy0RYfCNiQwL8FnrSivukBXbxdTYjg2LRszK5sjE7WvvRNb3a+ucRzuK\n"
+                    + "..................................................\n"
+                    + "JPSZgtTTZjDT4x6shtoHXcIz0wMIsDqmtcav0D95TsK2\n"
+                    + "-----END PRIVATE KEY-----\n";
+
+            // Convert the example private key string to a PrivateKey object
+            PrivateKey privateKey = getPrivateKeyFromString(examplePrivateKey);
+
+            // Encrypt using Public Key
+            String originalData = "Sensitive information";
+            byte[] encryptedData = encryptData(originalData, privateKey);
+
+            System.out.println("Encrypted Data: " + new String(encryptedData));
+
+            // Decrypt using Private Key
+            String decryptedData = decryptData(encryptedData, privateKey);
+
+            System.out.println("Decrypted Data: " + decryptedData);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static PrivateKey getPrivateKeyFromString(String key) throws Exception {
+        String privateKeyPEM = key.replace("-----BEGIN PRIVATE KEY-----\n", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replace("\n", "");
+
+        byte[] privateKeyBytes = java.util.Base64.getDecoder().decode(privateKeyPEM);
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
+    }
+
+    public static byte[] encryptData(String data, Key key) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        return cipher.doFinal(data.getBytes());
+    }
+
+    public static String decryptData(byte[] encryptedData, Key key) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        byte[] decryptedBytes = cipher.doFinal(encryptedData);
+        return new String(decryptedBytes);
+    }
+}

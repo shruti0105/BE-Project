@@ -1,0 +1,38 @@
+package com.project.app.controller;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
+
+import javax.crypto.Cipher;
+
+@RestController
+public class EncryptionController {
+
+    // Replace this with your actual public key (received from KeyPair generation)
+    static final String RSA_PUBLIC_KEY = "19018204270873924177280379548806633810531490379817504344005328668396146083489426047631249760278929491247681576675778635354745007223328892886457975762292849940926677739434688490479322397077741065322555108813968607962174244509757739413551131966358422284588081105727238778153790408098345379591478165856460521122231133645096809315928291797553692252981553127865013988783594066383081444220631719753004656598741802038794126400750706418317028892478037763235052947468677974584324704548118794345821221136399011380742326211410743179879451941901435359953150540948376182200994518749011003402942496485251346069274900397656271905591";
+
+    @PostMapping("/encrypt-credentials")
+    public String encryptCredentials(@RequestBody String credentialsToEncrypt) {
+        try {
+            // Get PublicKey instance from RSA_PUBLIC_KEY string (in real scenario, use the actual key)
+            byte[] encodedPublicKey = RSA_PUBLIC_KEY.getBytes();
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PublicKey publicKey = keyFactory.generatePublic(new X509EncodedKeySpec(encodedPublicKey));
+
+            // Encrypt credentials using the PublicKey
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            byte[] encryptedBytes = cipher.doFinal(credentialsToEncrypt.getBytes());
+
+            // Convert encrypted bytes to base64 encoded string
+            return java.util.Base64.getEncoder().encodeToString(encryptedBytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Encryption failed";
+        }
+    }
+}
+

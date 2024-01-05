@@ -1,0 +1,55 @@
+package com.project.npci.controller;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.crypto.Cipher;
+import java.security.Key;
+import java.security.PrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+
+@RestController
+public class YourController {
+
+    @PostMapping("/process-transaction")
+    public ResponseEntity<String> processTransaction(@RequestBody String encryptedData) {
+        try {
+            // Replace this example private key with your own properly formatted private key
+            String examplePrivateKey = "-----BEGIN PRIVATE KEY-----\n"
+                    + "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCrHbf4ExlrXoqX\n"
+                    + "5GMkZLkOjy0RYfCNiQwL8FnrSivukBXbxdTYjg2LRszK5sjE7WvvRNb3a+ucRzuK\n"
+                    // ... Your private key content ...
+                    + "JPSZgtTTZjDT4x6shtoHXcIz0wMIsDqmtcav0D95TsK2\n"
+                    + "-----END PRIVATE KEY-----\n";
+
+            PrivateKey privateKey = getPrivateKeyFromString(examplePrivateKey);
+
+            String decryptedData = decryptData(encryptedData.getBytes(), privateKey);
+            System.out.println("Decrypted Data: " + decryptedData);
+
+            return ResponseEntity.ok("Transaction processed successfully");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to process transaction");
+        }
+    }
+
+    public static PrivateKey getPrivateKeyFromString(String key) throws Exception {
+        String privateKeyPEM = key.replace("-----BEGIN PRIVATE KEY-----\n", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replace("\n", "");
+
+        byte[] privateKeyBytes = java.util.Base64.getDecoder().decode(privateKeyPEM);
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
+    }
+
+    public static String decryptData(byte[] encryptedData, Key key) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        byte[] decryptedBytes = cipher.doFinal(encryptedData);
+        return new String(decryptedBytes);
+    }
+}

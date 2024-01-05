@@ -1,0 +1,48 @@
+package com.project.npci.controller;
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import javax.crypto.Cipher;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.Base64;
+
+@RestController
+public class NpciController {
+
+    // Replace this example private key with your own properly formatted private key
+    static final String EXAMPLE_PRIVATE_KEY = "MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDhssEqIlyxGwYs9v+7iiqN6DaDWbIq7oZ05+oFhZ1A6bkkG7/DlsjOVFK6Ya5XHu5yMhMCoPWcP4B2TIPY9Ei2GyBwUX+mdLBanZlM1pa3glIQia18XjMZ7ptBOYwGpqA9qNVhA/OvGLzwhdHDuk2SrAheauGWyr8ZWrmCit6XDHEszTHIqhPXyE0DbjsQZuDky4gDoacdzzY8T5H1tnZwfKFBcqNew65hmYWtqiBNkDKKxr3xodjm79q+GgJELrpkAmSK3SG/DBF5tBkJ1W/8baCtYpPipdKr0z2J7WsE8KtQKO7u1Ojm1jSieCzoGEKpoha4XKIwx9o/sYtzQjZzAgMBAAECggEABzPotTsGgUJvBoVVcPs+U2wLPVLh/DvDf7yc+9MhSx6KYYwfKRNJUkhfoYIXicE7c9qEP8u6OuPN6jiT5psZLPKdrOf07m9/50xrRYf9pFqc2tlB95ub/uJeAw1emiG8MGuQb7msD7T25qgmoxvxeNJTrAu2KlVLFviNvgxHgUN9i3MJIAQXsgPqMOtwIwAeFIZL1GSmdFVgqiq6cztZqZqlIv8/8M2EjEtW25x20MNM15400V/0O61RR5xnB4QahGH4BSs5lhBdo1/ZRCNEXOFNiZ8xBq4MbCVfNlujDvB2vyafW20fMa4TneWoVffayb2TWxusS6cUOvjcSIP54QKBgQDvLqhQn3fPjV83UEXhHp1jchtQwekud5xmfSFU6379CYo1fBP4qFIa/uHV2NC2czP8PYTzxhJjeTTkgcq1aK8sW1/OztIYWh4mBpBNHpEMJ6m8nVxAYGOniW1LUd6AAKwexx6Ic1KGxDBnqdt92MZXkZp29pX5P1KJQvqWpQYoIQKBgQDxkWG0DNWF0qDfvdoRzA6DjPVUHrdzFP3AUaVCH9hCguC0ZelamGZFn5BwX31BT4tSxRSxb3WOz4WZxWAsnWzS0waJWvMjL3JFUsQ++hLRXHyaU2DDB/i3Qj9Yo8n0rUy6HYcvs9Djagj4Pim4ts0k2uhWyLAmbLsJnyDsb7W8EwKBgQDWv5OL38IY7huhdEdpmq1BToBL/+63M9mPA6Zbsp1v35Lh9qePyMD/T/3AnUy3o7P3M90daqez/G2LBSXVv0oYj2n0Kynjh3YuOhJxy5H70djKapcbje+ryu4AhF87ml7vu2QkqzZbnebADHfwBCQBF9ASI8//2+TlLOgFPeHLQQKBgQCTmAokIjtLuneEfNECUrUDd1plfScE72xi1v+ruR0+9gwo7KN5MOg73dQ4dH9pKhqsBbIw/zLKgMzWORwb5kuZPEogHiuz8cdVx84T1GMu+909xXe3ceVqwtVFaT15e3EHvgbdBHa6nAzC7+g57abFv+J5M8E8mO5mYI2TKGXXdQKBgQDKuNI0EiuJUW9vnQQIvoZCO2IyrHUKaC0hnsv6EnFQRDcXYaw1y/4TndZUIUHydkbqnmZZpXPVZPNP1MXEXoIdkpJ+4LndzJ8QyWQnI4DQpB40PiXV8QY4N9motV57BqXaoqsXGVPnF4n3DCIFwAHRk4b3MXaf2urMjagZU1pSrw==";
+    @PostMapping("/process-transaction")
+    public ResponseEntity<String> processTransaction(@RequestBody String encryptedData) {
+        try {
+            PrivateKey privateKey = getPrivateKeyFromString(EXAMPLE_PRIVATE_KEY);
+
+            String decryptedData = decryptData(encryptedData.getBytes(), privateKey);
+            System.out.println("Decrypted Data: " + decryptedData);
+
+            return ResponseEntity.ok("Transaction processed successfully");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to process transaction");
+        }
+    }
+
+    public static PrivateKey getPrivateKeyFromString(String key) throws Exception {
+//        String privateKeyPEM = key.replace("-----BEGIN PRIVATE KEY-----\n", "")
+//                .replace("-----END PRIVATE KEY-----", "")
+//                .replace("\n", "");
+
+        byte[] privateKeyBytes = Base64.getDecoder().decode(key);
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
+    }
+
+    public static String decryptData(byte[] encryptedData, Key key) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        byte[] decryptedBytes = cipher.doFinal(encryptedData);
+        return new String(decryptedBytes);
+    }
+}

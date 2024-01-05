@@ -1,0 +1,31 @@
+package com.project.npci.controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.project.npci.controller.Transaction;
+@RestController
+@RequestMapping("/npci")
+public class NpciController {
+
+    @PostMapping("/process-transaction")
+    public ResponseEntity<String> processTransaction(@RequestBody Transaction data) {
+        // Process the received transaction data from UPI server
+        // Your logic here...
+    	 try {
+             // Print the received data from UPI server
+             System.out.println("Received Transaction Data from UPI:");
+             System.out.println("Sender UID: " + data.getSuid());
+             System.out.println("Amount: " + data.getAmount());
+             System.out.println("Receiver UID: " + data.getRuid());
+        return ResponseEntity.ok("Transaction processed by NPCI successfully");
+    	 }
+    	 catch (Exception e) {
+             e.printStackTrace();
+             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to process data");
+         }
+    }
+}

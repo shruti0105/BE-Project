@@ -1,0 +1,62 @@
+package com.project.npci.controller;
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import javax.crypto.Cipher;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.Base64;
+
+@RestController
+public class NpciController {
+
+    // Replace this example private key with your own properly formatted private key
+    static final String EXAMPLE_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n" +
+            "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCsfHfX2GAXg1q3\n" +
+            // ... (replace with the rest of your private key content) ...
+            "iP3bQwKBgQCwPlH23WmP5qQkIteEzFec1gEmZ71/yUqBwApDBkCaaH9csq9ftt0d\n" +
+            "Ei5wVKtqkNWfpFjYqhavm+WFjeU/qwMOPPonl7FNwW8/xrsR7zLeRD5PH3OjGpW8\n" +
+            "u4EhCpFfRPv+0maSSOdjCzGIdAECgYB0nyS4RmLVXQZblMF99zRt17Jby+JbZ/fA\n" +
+            "p/wrOYwgcCLB+pgvg/KCNojROi1AbTvhGzRbX2WnGqGB0npGtbUraa7iQxf9jqhD\n" +
+            // ... (replace with the rest of your private key content) ...
+            "KwKNhW6kAyGaz6QQwJBAI6b0y+ho/Bebm1CjffOBlz7wzG8Moc9FmXfTkEObUksC\n" +
+            "QEcm+by1Oox6Wj67Rf14L/Eag2qrKJH4g76fOlIVRwECQQDLTVUUKrJZmt+bAAbs\n" +
+            "hADxHdIYzxBK2sj4E0/2p0C2aE+mbCztZF/ZU+3NVPnNgr7AxfirB+sfPL3eDx7R\n" +
+            // ... (replace with the rest of your private key content) ...
+            "nf9tAg2GRXkJA8wHlFgPpwwaBhINmiJSMuHRp2Vx3DYhB3qlt0c=\n" +
+            "-----END PRIVATE KEY-----";
+
+    @PostMapping("/process-transaction")
+    public ResponseEntity<String> processTransaction(@RequestBody String encryptedData) {
+        try {
+            PrivateKey privateKey = getPrivateKeyFromString(EXAMPLE_PRIVATE_KEY);
+
+            String decryptedData = decryptData(encryptedData.getBytes(), privateKey);
+            System.out.println("Decrypted Data: " + decryptedData);
+
+            return ResponseEntity.ok("Transaction processed successfully");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Failed to process transaction");
+        }
+    }
+
+    public static PrivateKey getPrivateKeyFromString(String key) throws Exception {
+        String privateKeyPEM = key.replace("-----BEGIN PRIVATE KEY-----\n", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replace("\n", "");
+
+        byte[] privateKeyBytes = Base64.getDecoder().decode(privateKeyPEM);
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
+    }
+
+    public static String decryptData(byte[] encryptedData, Key key) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        byte[] decryptedBytes = cipher.doFinal(encryptedData);
+        return new String(decryptedBytes);
+    }
+}

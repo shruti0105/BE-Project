@@ -1,0 +1,5 @@
+package com.project.upi.controller;
+
+public class RestTemplateConfig {
+
+}

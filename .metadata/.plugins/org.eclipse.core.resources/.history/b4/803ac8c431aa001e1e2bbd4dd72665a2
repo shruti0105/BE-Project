@@ -1,0 +1,38 @@
+package com.project.app.controller;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
+
+import javax.crypto.Cipher;
+
+@RestController
+public class EncryptionController {
+
+    // Replace this with your actual public key (received from KeyPair generation)
+    static final String RSA_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0vnM95ilcsFycJcaNpA8WpnY2632c/28K72nwJO9sm0jnOS2GTqDELk+rLk5o/cKkgyqtQyt8hJ99lMre34d9hsTRv8dY5Kv6w7GiYIRtHcmIEDSDOAlAUlV5V0A3hni9Yv+f2VdNZvp8hACn3CyTw/wlfdkDHIyYY68G5QZa9gXUPZJM9xJnr9Tx85zMBLCNnWLtpFHhoxrySJ6YlgtSP3yyySVxd0K4K38BRLsluC5+Sv9THNQRCY51wjyoaVx0QrXuJoLjbYvJYbsNRy+59Oxq4P27eRyGWb66RrcthQLGDKtXaTkpguFROp1sBJ220W8iLxA7AzfFY979y7t8wIDAQAB";
+
+    @PostMapping("/encrypt-credentials")
+    public String encryptCredentials(@RequestBody String credentialsToEncrypt) {
+        try {
+            // Get PublicKey instance from RSA_PUBLIC_KEY string (in real scenario, use the actual key)
+            byte[] encodedPublicKey = RSA_PUBLIC_KEY.getBytes();
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PublicKey publicKey = keyFactory.generatePublic(new X509EncodedKeySpec(encodedPublicKey));
+
+            // Encrypt credentials using the PublicKey
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+            byte[] encryptedBytes = cipher.doFinal(credentialsToEncrypt.getBytes());
+
+            // Convert encrypted bytes to base64 encoded string
+            return java.util.Base64.getEncoder().encodeToString(encryptedBytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Encryption failed";
+        }
+    }
+}
+

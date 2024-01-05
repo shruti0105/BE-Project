@@ -1,0 +1,58 @@
+package com.project.npci.controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
+
+import javax.crypto.Cipher;
+
+@RestController
+public class NpciController {
+
+    // Arbitrary private key (for demonstration purposes)
+    static final String RSA_PRIVATE_KEY =
+            "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDJfaQaT7JGxj8g" +
+            "OndPY/7Lf6O0edqjR9sO86roSW5tUEAijF3sqSAAmJKTSTx1Fy3a0H9FuD8RqAZy" +
+            // ... (more key data)
+            "gAnDkAuBdAjeck4M89POQ+7MjPvFMskKzvDyDa6eWjLGOx1fjtmf3R8jvHs7P5L" +
+            "cCVkdo+t3aL5X7Ddj7UWJHLW4S/TX4eUeQk4sk5BaDGNF6SPsGIt";
+
+    @PostMapping("/process-transaction")
+    public ResponseEntity<String> processTransaction(@RequestBody String encryptedData) {
+        try {
+            // Decode the received encrypted data from Base64
+            byte[] encryptedBytes = Base64.getDecoder().decode(encryptedData);
+
+            // Perform decryption using the private key
+            PrivateKey privateKey = getPrivateKeyFromString(RSA_PRIVATE_KEY);
+            Cipher cipher = Cipher.getInstance("RSA");
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+
+            // Convert the decrypted bytes to a string
+            String decryptedData = new String(decryptedBytes);
+
+            // Process the decrypted data as needed
+            System.out.println("Decrypted data: " + decryptedData);
+
+            return ResponseEntity.ok("Data decrypted and processed successfully");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to decrypt or process data");
+        }
+    }
+
+    // Helper method to get PrivateKey from a string representation
+    private PrivateKey getPrivateKeyFromString(String key) throws Exception {
+        byte[] privateKeyBytes = Base64.getDecoder().decode(key);
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(privateKeyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return keyFactory.generatePrivate(spec);
+    }
+}
+

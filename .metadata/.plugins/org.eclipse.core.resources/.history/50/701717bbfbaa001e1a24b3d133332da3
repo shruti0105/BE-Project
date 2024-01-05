@@ -1,0 +1,24 @@
+package com.project.app.controller;
+import java.security.*;
+
+public class Keys_new {
+    public static void main(String[] args) throws NoSuchAlgorithmException {
+        // Generate a Key Pair Generator for RSA
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+        
+        // Initialize the Key Pair Generator with key size
+        keyPairGenerator.initialize(2048); // You can change the key size as needed
+        
+        // Generate the key pair
+        KeyPair keyPair = keyPairGenerator.generateKeyPair();
+        
+        // Get the private and public keys
+        PrivateKey privateKey = keyPair.getPrivate();
+        PublicKey publicKey = keyPair.getPublic();
+        
+        // Print the keys (in encoded format)
+        System.out.println("Private Key: " + Base64.getEncoder().encodeToString(privateKey.getEncoded()));
+        System.out.println("Public Key: " + Base64.getEncoder().encodeToString(publicKey.getEncoded()));
+    }
+}
+

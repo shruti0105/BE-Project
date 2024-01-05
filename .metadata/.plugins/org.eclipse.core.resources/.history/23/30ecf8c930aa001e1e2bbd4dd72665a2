@@ -1,0 +1,32 @@
+import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
+
+public class PublicKeyFromString {
+
+    public static void main(String[] args) {
+        try {
+            // Generate an RSA key pair
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(2048);
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+
+            // Get the public key from the generated key pair
+            PublicKey publicKey = keyPair.getPublic();
+
+            // Encode the public key to Base64 string
+            String encodedPublicKey = Base64.getEncoder().encodeToString(publicKey.getEncoded());
+            System.out.println("Encoded Public Key: " + encodedPublicKey);
+
+            // Decode the Base64 string back to PublicKey object
+            byte[] decodedKey = Base64.getDecoder().decode(encodedPublicKey);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(decodedKey);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PublicKey decodedPublicKey = keyFactory.generatePublic(keySpec);
+
+            System.out.println("Decoded Public Key: " + decodedPublicKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}

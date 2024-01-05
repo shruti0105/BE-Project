@@ -1,0 +1,29 @@
+package com.project.npci.controller;
+
+import java.security.*;
+
+public class Keys {
+
+    public static void main(String[] args) {
+        try {
+            // Create a KeyPairGenerator object with RSA algorithm
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            
+            // Initialize the KeyPairGenerator with a specific key size and SecureRandom instance
+            keyPairGenerator.initialize(2048); // Key size (in bits), 2048 is commonly used
+            
+            // Generate KeyPair
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+            
+            // Retrieve the Public and Private Keys from the KeyPair
+            PublicKey publicKey = keyPair.getPublic();
+            PrivateKey privateKey = keyPair.getPrivate();
+            
+            // Print the generated keys (just for demonstration)
+            System.out.println("Generated Public Key: " + publicKey);
+            System.out.println("Generated Private Key: " + privateKey);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
+}

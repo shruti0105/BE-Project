@@ -1,0 +1,50 @@
+package com.project.app.controller;
+
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
+
+public class Keys {
+
+    public static void main(String[] args) {
+        try {
+            // Generate an RSA key pair
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(2048);
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+
+            // Get the public and private keys from the generated key pair
+            PublicKey publicKey = keyPair.getPublic();
+            PrivateKey privateKey = keyPair.getPrivate();
+
+            // Encode the public and private keys to Base64 strings
+            String encodedPublicKey = Base64.getEncoder().encodeToString(publicKey.getEncoded());
+            String encodedPrivateKey = Base64.getEncoder().encodeToString(privateKey.getEncoded());
+
+            System.out.println("Encoded Public Key: " + encodedPublicKey);
+            System.out.println("Encoded Private Key: " + encodedPrivateKey);
+
+            // Decode the Base64 strings back to PublicKey and PrivateKey objects
+            byte[] decodedPublicKey = Base64.getDecoder().decode(encodedPublicKey);
+            byte[] decodedPrivateKey = Base64.getDecoder().decode(encodedPrivateKey);
+
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+            // Decode Public Key
+            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(decodedPublicKey);
+            PublicKey decodedPubKey = keyFactory.generatePublic(publicKeySpec);
+            System.out.println("Decoded Public Key: " + decodedPubKey);
+
+            // Decode Private Key
+            PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(decodedPrivateKey);
+            PrivateKey decodedPrivKey = keyFactory.generatePrivate(privateKeySpec);
+            System.out.println("Decoded Private Key: " + decodedPrivKey);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+//public: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0vnM95ilcsFycJcaNpA8WpnY2632c/28K72nwJO9sm0jnOS2GTqDELk+rLk5o/cKkgyqtQyt8hJ99lMre34d9hsTRv8dY5Kv6w7GiYIRtHcmIEDSDOAlAUlV5V0A3hni9Yv+f2VdNZvp8hACn3CyTw/wlfdkDHIyYY68G5QZa9gXUPZJM9xJnr9Tx85zMBLCNnWLtpFHhoxrySJ6YlgtSP3yyySVxd0K4K38BRLsluC5+Sv9THNQRCY51wjyoaVx0QrXuJoLjbYvJYbsNRy+59Oxq4P27eRyGWb66RrcthQLGDKtXaTkpguFROp1sBJ220W8iLxA7AzfFY979y7t8wIDAQAB
